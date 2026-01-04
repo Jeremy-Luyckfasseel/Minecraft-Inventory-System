@@ -1,0 +1,24 @@
+{
+  "name": "minecraft-inventory-system",
+  "version": "1.0.0",
+  "description": "Node.js/Express API voor een Minecraft Inventory System schoolproject",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "setup": "node setup_database.js"
+  },
+  "keywords": [
+    "minecraft",
+    "inventory",
+    "api",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.7"
+  }
+}
