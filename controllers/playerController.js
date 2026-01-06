@@ -42,6 +42,8 @@ exports.createPlayer = (req, res) => {
     const errors = [];
     if (!name || name.trim() === '') {
         errors.push('Name is verplicht');
+    } else if (/\d/.test(name)) {
+        errors.push('Name mag geen cijfers bevatten');
     }
     if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.push('Geldig email is verplicht');
     if (!gamemode || !['survival', 'creative', 'adventure', 'spectator'].includes(gamemode)) {
@@ -75,6 +77,9 @@ exports.updatePlayer = (req, res) => {
     
     // Validatie
     const errors = [];
+    if (name && /\d/.test(name)) {
+        errors.push('Name mag geen cijfers bevatten');
+    }
     if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.push('Ongeldig email formaat');
     if (gamemode && !['survival', 'creative', 'adventure', 'spectator'].includes(gamemode)) {
         errors.push('Gamemode moet survival, creative, adventure of spectator zijn');

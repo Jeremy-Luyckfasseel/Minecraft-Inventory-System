@@ -5,6 +5,9 @@ const path = require('path');
 const playerRoutes = require('./routes/playerRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 
+// Load endpoint documentation
+const endpointsDocs = require('./config/endpoints.json');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -13,17 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Root route
+// Root route - serve documentation HTML
 app.get('/', (req, res) => {
-    res.json({
-        message: '🎮 Welkom bij de Minecraft Inventory System API!',
-        version: '1.0.0',
-        endpoints: {
-            players: '/api/players',
-            items: '/api/items',
-            documentation: '/docs'
-        }
-    });
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Health check
@@ -31,13 +26,18 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// API Documentation endpoint - serves endpoints.json for dynamic loading
+app.get('/api/docs/endpoints', (req, res) => {
+    res.json(endpointsDocs);
+});
+
 // API Routes
 app.use('/api/players', playerRoutes);
 app.use('/api/items', itemRoutes);
 
-// Documentation route (Dag 4)
+// Documentation route (redirect to root)
 app.get('/docs', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.redirect('/');
 });
 
 // 404 handler
