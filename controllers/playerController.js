@@ -40,7 +40,9 @@ exports.createPlayer = (req, res) => {
     
     // Validatie
     const errors = [];
-    if (!name || name.trim() === '') errors.push('Name is verplicht');
+    if (!name || name.trim() === '') {
+        errors.push('Name is verplicht');
+    }
     if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.push('Geldig email is verplicht');
     if (!gamemode || !['survival', 'creative', 'adventure', 'spectator'].includes(gamemode)) {
         errors.push('Gamemode moet survival, creative, adventure of spectator zijn');
