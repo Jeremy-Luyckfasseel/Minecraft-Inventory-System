@@ -1,0 +1,488 @@
+{
+  "info": {
+    "title": "Minecraft Inventory API",
+    "version": "3.0.0",
+    "description": "RESTful API met Catalog Pattern architectuur. Items worden gedefinieerd in de item_catalog (1300+ items) en instanties worden opgeslagen in de inventory."
+  },
+  "architecture": {
+    "title": "🏗️ Catalog Pattern",
+    "description": "De API gebruikt twee tabellen: item_catalog (definities) en inventory (speler bezit). Durability en stack limits komen uit de catalog.",
+    "tables": {
+      "item_catalog": "1300+ Minecraft 1.21 items van PrismarineJS met max_durability en stack_limit",
+      "inventory": "Speler items met catalog_id FK, enchantments en metadata"
+    }
+  },
+  "entities": {
+    "catalog_item": {
+      "name": "Catalog Item",
+      "description": "Een item definitie in de catalog (source of truth)",
+      "fields": {
+        "id": { "type": "integer", "description": "Unieke identifier" },
+        "name": { "type": "string", "description": "Item naam (bijv. 'Diamond Sword')" },
+        "slug": { "type": "string", "description": "URL-safe identifier (bijv. 'diamond_sword')" },
+        "category": { "type": "string", "description": "weapon, tool, armor, consumable, block, material, misc" },
+        "stack_limit": { "type": "integer", "description": "Max stack size (1, 16, of 64)" },
+        "max_durability": { "type": "integer|null", "description": "NULL voor non-durability items" }
+      }
+    },
+    "inventory_item": {
+      "name": "Inventory Item",
+      "description": "Een item in de inventory van een speler",
+      "fields": {
+        "id": { "type": "integer", "description": "Unieke inventory ID" },
+        "player_id": { "type": "integer", "description": "Eigenaar van het item" },
+        "catalog_id": { "type": "integer", "description": "FK naar item_catalog" },
+        "amount": { "type": "integer", "description": "Aantal (max = catalog.stack_limit)" },
+        "current_durability": { "type": "integer|null", "description": "Huidige durability" },
+        "enchantments": { "type": "array", "description": "JSON array van enchantments [{id, lvl}]" },
+        "metadata": { "type": "object", "description": "Extra data (potion effects, stored enchantments)" }
+      }
+    }
+  },
+  "endpoints": [
+    {
+      "group": "Catalog",
+      "icon": "📚",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/items/catalog",
+          "summary": "Alle catalog items ophalen",
+          "description": "Retourneert alle 1300+ Minecraft items met hun eigenschappen. Filter op category met ?category=weapon",
+          "parameters": [
+            { "name": "category", "in": "query", "type": "string", "required": false, "description": "Filter: weapon, tool, armor, consumable, block, material, misc" },
+            { "name": "search", "in": "query", "type": "string", "required": false, "description": "Zoek op naam" }
+          ],
+          "responses": {
+            "200": {
+              "description": "Catalog opgehaald",
+              "example": {
+                "message": "Item catalog opgehaald",
+                "count": 1332,
+                "data": [
+                  { "id": 1, "name": "Stone", "slug": "stone", "category": "block", "stack_limit": 64, "max_durability": null },
+                  { "id": 799, "name": "Diamond Sword", "slug": "diamond_sword", "category": "weapon", "stack_limit": 1, "max_durability": 1561 },
+                  { "id": 1114, "name": "Enchanted Book", "slug": "enchanted_book", "category": "block", "stack_limit": 1, "max_durability": null }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/items/catalog/:slug",
+          "summary": "Specifiek catalog item",
+          "description": "Retourneert één catalog item op basis van slug.",
+          "parameters": [
+            { "name": "slug", "in": "path", "type": "string", "required": true, "description": "Item slug (bijv. diamond_sword, potion, enchanted_book)" }
+          ],
+          "responses": {
+            "200": {
+              "description": "Item gevonden",
+              "example": {
+                "data": { "id": 799, "name": "Diamond Sword", "slug": "diamond_sword", "category": "weapon", "stack_limit": 1, "max_durability": 1561 }
+              }
+            },
+            "404": { "description": "Item niet in catalog" }
+          }
+        }
+      ]
+    },
+    {
+      "group": "Inventory",
+      "icon": "🎒",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/items",
+          "summary": "Alle inventory items",
+          "description": "Retourneert alle items met catalog info (via JOIN). Durability komt uit de catalog.",
+          "parameters": [
+            { "name": "search", "in": "query", "type": "string", "required": false, "description": "Zoek op item naam" },
+            { "name": "category", "in": "query", "type": "string", "required": false, "description": "Filter op category" },
+            { "name": "player", "in": "query", "type": "string", "required": false, "description": "Filter op speler naam" },
+            { "name": "sort", "in": "query", "type": "string", "required": false, "description": "Sorteer op: name, amount, current_durability, id, category" },
+            { "name": "order", "in": "query", "type": "string", "required": false, "description": "asc of desc" },
+            { "name": "limit", "in": "query", "type": "integer", "required": false, "description": "Aantal resultaten (default: 20)" },
+            { "name": "offset", "in": "query", "type": "integer", "required": false, "description": "Skip aantal items" }
+          ],
+          "responses": {
+            "200": {
+              "description": "Items opgehaald",
+              "example": {
+                "message": "Inventory items opgehaald",
+                "count": 14,
+                "data": [
+                  {
+                    "id": 1,
+                    "player_id": 1,
+                    "player_name": "Steve",
+                    "amount": 1,
+                    "enchantments": [{ "id": "sharpness", "lvl": 3 }, { "id": "unbreaking", "lvl": 2 }],
+                    "catalog": {
+                      "id": 799,
+                      "name": "Diamond Sword",
+                      "slug": "diamond_sword",
+                      "category": "weapon",
+                      "stack_limit": 1
+                    },
+                    "durability": {
+                      "max": 1561,
+                      "current": 1400,
+                      "percentage": 89,
+                      "status": "OK"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/items/:id",
+          "summary": "Specifiek inventory item",
+          "description": "Retourneert één item met volledige catalog en durability info.",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Inventory item ID" }
+          ],
+          "responses": {
+            "200": { "description": "Item gevonden met catalog info en durability" },
+            "404": { "description": "Item niet gevonden" }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/items",
+          "summary": "Item toevoegen aan inventory",
+          "description": "Voegt een item toe op basis van catalog_item slug. Automatische stacking als stack_limit > 1.",
+          "infoCard": {
+            "title": "📦 Catalog Pattern",
+            "content": "Gebruik 'catalog_item' met een slug uit de catalog. Durability wordt automatisch ingesteld vanuit de catalog. Amount moet minimaal 1 zijn."
+          },
+          "requestBody": {
+            "required": true,
+            "example": {
+              "catalog_item": "diamond_sword",
+              "player_id": 1,
+              "amount": 1
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Item toegevoegd",
+              "example": {
+                "message": "Item toegevoegd aan inventory",
+                "data": {
+                  "id": 15,
+                  "catalog": { "id": 799, "name": "Diamond Sword", "slug": "diamond_sword" },
+                  "durability": { "max": 1561, "current": 1561, "percentage": 100, "status": "OK" }
+                }
+              }
+            },
+            "200": {
+              "description": "Stack bijgewerkt (item bestond al)",
+              "example": {
+                "message": "Stack bijgewerkt: 32 → 42",
+                "stacked": true
+              }
+            },
+            "400": {
+              "description": "Stack overflow of invalid amount",
+              "example": { "error": "STACK_OVERFLOW", "message": "Maximum stack is 64", "current": 64, "max": 64 }
+            },
+            "404": {
+              "description": "Catalog item niet gevonden",
+              "example": { "error": "Item 'fake_item' niet gevonden in catalog", "hint": "Gebruik GET /api/items/catalog om beschikbare items te zien" }
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/items",
+          "summary": "Potion toevoegen met metadata",
+          "description": "Gebruik het metadata veld voor potions om het effect type op te geven. Werkt voor alle potions: potion, splash_potion, lingering_potion.",
+          "infoCard": {
+            "title": "🧪 Potion Metadata",
+            "content": "Potions gebruiken metadata om effect, duration en amplifier op te slaan. Eén catalog item, oneindige variaties!"
+          },
+          "requestBody": {
+            "required": true,
+            "example": {
+              "catalog_item": "potion",
+              "player_id": 1,
+              "metadata": {
+                "effect": "night_vision",
+                "duration": 180,
+                "amplifier": 0
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Potion toegevoegd",
+              "example": {
+                "message": "Item toegevoegd aan inventory",
+                "data": {
+                  "id": 16,
+                  "catalog": { "name": "Potion", "slug": "potion", "category": "consumable" },
+                  "metadata": { "effect": "night_vision", "duration": 180, "amplifier": 0 },
+                  "durability": null
+                }
+              }
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/items",
+          "summary": "Enchanted Book toevoegen met stored enchantments",
+          "description": "Gebruik metadata voor enchanted books om de opgeslagen enchantments op te geven. Een book kan meerdere enchantments bevatten.",
+          "infoCard": {
+            "title": "📖 Enchanted Book Metadata",
+            "content": "Enchanted books slaan hun enchantments op in metadata.stored_enchantments. Zo kun je één catalog item gebruiken voor alle variaties!"
+          },
+          "requestBody": {
+            "required": true,
+            "example": {
+              "catalog_item": "enchanted_book",
+              "player_id": 1,
+              "metadata": {
+                "stored_enchantments": [
+                  { "id": "mending", "lvl": 1 },
+                  { "id": "unbreaking", "lvl": 3 }
+                ]
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Enchanted Book toegevoegd",
+              "example": {
+                "message": "Item toegevoegd aan inventory",
+                "data": {
+                  "id": 17,
+                  "catalog": { "name": "Enchanted Book", "slug": "enchanted_book" },
+                  "metadata": { "stored_enchantments": [{ "id": "mending", "lvl": 1 }] },
+                  "durability": null
+                }
+              }
+            }
+          }
+        },
+        {
+          "method": "PUT",
+          "path": "/api/items/:id",
+          "summary": "Item bijwerken",
+          "description": "Wijzig amount, current_durability, enchantments of metadata. Validatie: amount <= stack_limit, durability <= max_durability.",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Inventory item ID" }
+          ],
+          "requestBody": {
+            "example": { "amount": 32, "current_durability": 1000 }
+          },
+          "responses": {
+            "200": { "description": "Item bijgewerkt" },
+            "400": { "description": "Validatie fout (amount > stack_limit, durability > max)" },
+            "404": { "description": "Item niet gevonden" }
+          }
+        },
+        {
+          "method": "PUT",
+          "path": "/api/items/:id/use",
+          "summary": "Item gebruiken (durability damage)",
+          "description": "Past durability damage toe met Unbreaking enchantment logica. Item wordt PERMANENT VERWIJDERD uit database bij 0 durability (net als Minecraft).",
+          "infoCard": {
+            "title": "🎲 Unbreaking Logic",
+            "content": "Kans om damage te negeren = Level / (Level + 1). Unbreaking I = 50%, II = 66.7%, III = 75% kans om damage te blokkeren."
+          },
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Inventory item ID" }
+          ],
+          "requestBody": { 
+            "example": { "times": 10 },
+            "description": "Aantal keer dat het item wordt gebruikt"
+          },
+          "responses": {
+            "200": {
+              "description": "Item gebruikt",
+              "example": { 
+                "message": "Item 10x gebruikt", 
+                "uses": 10,
+                "damage_applied": 4, 
+                "damage_blocked": 6,
+                "data": { "durability": { "current": 1390, "max": 1561 } }
+              }
+            },
+            "200_broken": {
+              "description": "Item kapot (permanent verwijderd uit database)",
+              "example": { 
+                "message": "💥 Diamond Sword is kapot gegaan!", 
+                "item_broken": true,
+                "uses": 100,
+                "damage_applied": 50,
+                "deletedItem": { "id": 15, "catalog": { "name": "Diamond Sword" } }
+              }
+            },
+            "400": {
+              "description": "Item heeft geen durability",
+              "example": { "error": "Dit item heeft geen durability" }
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/items/:id/enchant",
+          "summary": "Enchantment toevoegen aan item",
+          "description": "Voegt een enchantment toe aan een bestaand item. Als het enchantment al bestaat, wordt het level overschreven.",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Inventory item ID" }
+          ],
+          "requestBody": {
+            "required": true,
+            "example": { "id": "sharpness", "lvl": 5 }
+          },
+          "responses": {
+            "201": { 
+              "description": "Enchantment toegevoegd",
+              "example": {
+                "message": "Enchantment sharpness toegevoegd",
+                "data": {
+                  "enchantments": [{ "id": "sharpness", "lvl": 5 }, { "id": "unbreaking", "lvl": 3 }]
+                }
+              }
+            },
+            "400": { "description": "Enchantment id is verplicht" },
+            "404": { "description": "Item niet gevonden" }
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/items/:id",
+          "summary": "Item verwijderen uit inventory",
+          "description": "Verwijdert een item permanent uit de inventory.",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Inventory item ID" }
+          ],
+          "responses": {
+            "200": { 
+              "description": "Item verwijderd",
+              "example": {
+                "message": "Item verwijderd",
+                "deletedItem": { "id": 15, "catalog": { "name": "Diamond Sword" } }
+              }
+            },
+            "404": { "description": "Item niet gevonden" }
+          }
+        }
+      ]
+    },
+    {
+      "group": "Players",
+      "icon": "👥",
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/players",
+          "summary": "Alle spelers ophalen",
+          "description": "Retourneert alle geregistreerde spelers met hun gamemode en level.",
+          "responses": {
+            "200": {
+              "description": "Spelers opgehaald",
+              "example": {
+                "message": "Alle spelers opgehaald",
+                "count": 3,
+                "data": [
+                  { "id": 1, "name": "Steve", "gamemode": "survival", "level": 25, "email": "steve@minecraft.net" },
+                  { "id": 2, "name": "Alex", "gamemode": "creative", "level": 50, "email": "alex@minecraft.net" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/players/:id",
+          "summary": "Specifieke speler ophalen",
+          "description": "Retourneert de details van één speler op basis van het ID.",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Speler ID" }
+          ],
+          "responses": {
+            "200": { "description": "Speler gevonden" },
+            "404": { "description": "Speler niet gevonden" }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/players/:id/items",
+          "summary": "Items van een speler",
+          "description": "Retourneert alle inventory items die een specifieke speler bezit.",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Speler ID" }
+          ],
+          "responses": {
+            "200": { 
+              "description": "Items opgehaald",
+              "example": {
+                "message": "Items van Steve",
+                "player": { "id": 1, "name": "Steve", "gamemode": "survival" },
+                "count": 4,
+                "items": []
+              }
+            },
+            "404": { "description": "Speler niet gevonden" }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/players",
+          "summary": "Nieuwe speler aanmaken",
+          "description": "Maakt een nieuwe speler aan. Gamemode moet survival, creative, adventure of spectator zijn.",
+          "requestBody": {
+            "required": true,
+            "example": { 
+              "name": "Notch", 
+              "gamemode": "creative", 
+              "level": 100, 
+              "email": "notch@minecraft.net" 
+            }
+          },
+          "responses": {
+            "201": { "description": "Speler aangemaakt" },
+            "400": { "description": "Validatie fout (ongeldige gamemode, email al in gebruik)" }
+          }
+        },
+        {
+          "method": "PUT",
+          "path": "/api/players/:id",
+          "summary": "Speler bijwerken",
+          "description": "Wijzig naam, gamemode, level of email van een speler.",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Speler ID" }
+          ],
+          "requestBody": { 
+            "example": { "level": 30, "gamemode": "survival" } 
+          },
+          "responses": {
+            "200": { "description": "Speler bijgewerkt" },
+            "404": { "description": "Speler niet gevonden" }
+          }
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/players/:id",
+          "summary": "Speler verwijderen",
+          "description": "Verwijdert een speler en alle bijbehorende inventory items (CASCADE).",
+          "parameters": [
+            { "name": "id", "in": "path", "type": "integer", "required": true, "description": "Speler ID" }
+          ],
+          "responses": {
+            "200": { "description": "Speler en inventory verwijderd" },
+            "404": { "description": "Speler niet gevonden" }
+          }
+        }
+      ]
+    }
+  ]
+}
