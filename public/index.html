@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference | Minecraft Inventory System</title>
+    <style>
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-code: #1e1e1e;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --accent: #228b22;
+            --accent-light: #e8f5e9;
+            --border: #dee2e6;
+            --method-get: #28a745;
+            --method-post: #ffc107;
+            --method-put: #17a2b8;
+            --method-delete: #dc3545;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        .layout { display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar-header { padding: 0 24px 24px; border-bottom: 1px solid var(--border); }
+        .sidebar-header h1 { font-size: 18px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        .sidebar-header p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+        .nav-section {
+            padding: 16px 24px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+        .nav-link {
+            display: block;
+            padding: 8px 24px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+        .nav-link:hover { background: var(--accent-light); }
+        .nav-link.active { background: var(--accent-light); color: var(--accent); border-left: 3px solid var(--accent); padding-left: 21px; }
+        
+        /* Main Content */
+        .main { flex: 1; margin-left: 280px; padding: 48px 64px; max-width: 900px; }
+        h1 { font-size: 32px; margin-bottom: 16px; }
+        h2 { font-size: 24px; margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--border); }
+        h3 { font-size: 18px; margin: 32px 0 12px; }
+        p { margin-bottom: 16px; color: var(--text-secondary); }
+        
+        /* Endpoint Block */
+        .endpoint { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; margin: 24px 0; overflow: hidden; }
+        .endpoint-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: #fafafa; border-bottom: 1px solid var(--border); }
+        .method { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; color: #fff; }
+        .method-GET { background: var(--method-get); }
+        .method-POST { background: var(--method-post); color: #212529; }
+        .method-PUT { background: var(--method-put); }
+        .method-DELETE { background: var(--method-delete); }
+        .endpoint-path { font-family: 'SF Mono', 'Consolas', monospace; font-size: 14px; }
+        .endpoint-body { padding: 20px; }
+        .endpoint-desc { margin-bottom: 20px; color: var(--text-primary); }
+        
+        /* Parameters Table */
+        .params-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin: 20px 0 12px; }
+        .params-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .params-table th { text-align: left; padding: 10px 12px; background: #f8f9fa; border: 1px solid var(--border); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+        .params-table td { padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; }
+        .param-name { font-family: 'SF Mono', 'Consolas', monospace; color: var(--accent); }
+        .param-type { color: var(--method-put); font-size: 12px; }
+        .required { color: var(--method-delete); font-size: 11px; font-weight: 600; }
+        .optional { color: var(--text-secondary); font-size: 11px; }
+        
+        /* Code Blocks */
+        .code-block { background: var(--bg-code); border-radius: 6px; margin: 16px 0; overflow: hidden; }
+        .code-header { background: #2d2d2d; padding: 8px 16px; font-size: 12px; color: #888; border-bottom: 1px solid #404040; }
+        .code-header.error { background: #5a2d2d; border-color: #8b4545; }
+        .code-header.warning { background: #5a4d2d; border-color: #8b7545; }
+        .code-body { padding: 16px; color: #d4d4d4; font-family: 'SF Mono', 'Consolas', monospace; font-size: 13px; white-space: pre; overflow-x: auto; }
+        .code-body .key { color: #9cdcfe; }
+        .code-body .string { color: #ce9178; }
+        .code-body .number { color: #b5cea8; }
+        
+        /* Info Card - Clean, minimal style */
+        .info-card { 
+            background: transparent; 
+            border-left: 3px solid var(--accent);
+            padding: 12px 20px; 
+            margin: 20px 0; 
+        }
+        .info-card h3 { margin: 0 0 6px; font-size: 14px; color: var(--accent); font-weight: 600; }
+        .info-card p { color: var(--text-secondary); margin: 0; font-size: 14px; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 60px; color: var(--text-secondary); }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>⛏️ Minecraft Inventory</h1>
+                <p>API Reference v1.0</p>
+            </div>
+            <div id="sidebar-nav">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    Loading...
+                </div>
+            </div>
+        </nav>
+        
+        <main class="main">
+            <h1>Minecraft Inventory API</h1>
+            <p>The Minecraft Inventory API allows you to programmatically manage players and their inventory items. This RESTful API uses standard HTTP methods and returns JSON responses.</p>
+            
+            <div id="endpoints-container">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    Loading documentation...
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Fetch and render endpoints from JSON
+        async function loadEndpoints() {
+            try {
+                const response = await fetch('/api/docs/endpoints');
+                const data = await response.json();
+                
+                renderSidebar(data);
+                renderEndpoints(data);
+                
+            } catch (error) {
+                console.error('Failed to load endpoints:', error);
+                document.getElementById('endpoints-container').innerHTML = `
+                    <div class="error">Failed to load API documentation: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Render sidebar navigation
+        function renderSidebar(data) {
+            const nav = document.getElementById('sidebar-nav');
+            let html = '';
+            const idCounts = {}; // Track duplicate IDs
+            
+            data.endpoints.forEach(group => {
+                html += `<div class="nav-section">${group.icon} ${group.group}</div>`;
+                group.routes.forEach(route => {
+                    const id = createUniqueId(route.path, route.method, idCounts);
+                    html += `<a href="#${id}" class="nav-link">${route.summary}</a>`;
+                });
+            });
+            
+            nav.innerHTML = html;
+        }
+        
+        // Render endpoints
+        function renderEndpoints(data) {
+            const container = document.getElementById('endpoints-container');
+            let html = '';
+            const idCounts = {}; // Track duplicate IDs (same counter as sidebar)
+            
+            data.endpoints.forEach(group => {
+                html += `<h2>${group.icon} ${group.group}</h2>`;
+                
+                group.routes.forEach(route => {
+                    const id = createUniqueId(route.path, route.method, idCounts);
+                    html += renderEndpoint(id, route);
+                });
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Render single endpoint
+        function renderEndpoint(id, route) {
+            let html = `
+                <div class="endpoint" id="${id}">
+                    <div class="endpoint-header">
+                        <span class="method method-${route.method}">${route.method}</span>
+                        <span class="endpoint-path">${route.path}</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <p class="endpoint-desc">${route.description}</p>
+            `;
+            
+            // Info Card (for special mechanics like Unbreaking)
+            if (route.infoCard) {
+                html += `
+                    <div class="info-card">
+                        <h3>${route.infoCard.title}</h3>
+                        <p>${route.infoCard.content}</p>
+                    </div>
+                `;
+            }
+            
+            // Parameters table
+            if (route.parameters && route.parameters.length > 0) {
+                html += `
+                    <div class="params-title">Parameters</div>
+                    <table class="params-table">
+                        <tr><th>Name</th><th>In</th><th>Type</th><th>Description</th></tr>
+                `;
+                route.parameters.forEach(p => {
+                    html += `
+                        <tr>
+                            <td><span class="param-name">${p.name}</span> ${p.required ? '<span class="required">required</span>' : '<span class="optional">optional</span>'}</td>
+                            <td>${p.in}</td>
+                            <td><span class="param-type">${p.type}</span></td>
+                            <td>${p.description || ''}</td>
+                        </tr>
+                    `;
+                });
+                html += '</table>';
+            }
+            
+            // Request Body
+            if (route.requestBody && route.requestBody.example) {
+                html += `
+                    <div class="params-title">Request Body</div>
+                    <div class="code-block">
+                        <div class="code-header">Example Request</div>
+                        <div class="code-body">${formatJson(route.requestBody.example)}</div>
+                    </div>
+                `;
+            }
+            
+            // Responses
+            if (route.responses) {
+                Object.entries(route.responses).forEach(([code, resp]) => {
+                    const isError = code.startsWith('4') || code.startsWith('5');
+                    const headerClass = isError ? (code === '400' ? 'warning' : 'error') : '';
+                    
+                    html += `
+                        <div class="code-block">
+                            <div class="code-header ${headerClass}">${resp.description} · ${code}</div>
+                            ${resp.example ? `<div class="code-body">${formatJson(resp.example)}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div></div>';
+            return html;
+        }
+        
+        // Format JSON with syntax highlighting
+        function formatJson(obj) {
+            const json = JSON.stringify(obj, null, 2);
+            return json
+                .replace(/"([^"]+)":/g, '<span class="key">"$1"</span>:')
+                .replace(/: "([^"]+)"/g, ': <span class="string">"$1"</span>')
+                .replace(/: (\d+)/g, ': <span class="number">$1</span>')
+                .replace(/: (true|false)/g, ': <span class="number">$1</span>');
+        }
+        
+        // Create base ID from path and method
+        function createId(path, method) {
+            return `${method.toLowerCase()}-${path.replace(/[/:]/g, '-').replace(/--+/g, '-').replace(/^-|-$/g, '')}`;
+        }
+        
+        // Create unique ID, appending index for duplicates
+        function createUniqueId(path, method, idCounts) {
+            const baseId = createId(path, method);
+            if (!idCounts[baseId]) {
+                idCounts[baseId] = 1;
+                return baseId;
+            }
+            idCounts[baseId]++;
+            return `${baseId}-${idCounts[baseId]}`;
+        }
+        
+        // Load on page ready
+        document.addEventListener('DOMContentLoaded', loadEndpoints);
+        
+        // Scroll spy: highlight nav link based on visible section
+        function initScrollSpy() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const endpointSections = document.querySelectorAll('.endpoint');
+            
+            if (endpointSections.length === 0) return;
+            
+            // Track which section is visible
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Middle of viewport triggers
+                threshold: 0
+            });
+            
+            endpointSections.forEach(section => observer.observe(section));
+        }
+        
+        // Re-init scroll spy after content loads
+        const originalRenderEndpoints = renderEndpoints;
+        renderEndpoints = function(data) {
+            originalRenderEndpoints(data);
+            setTimeout(initScrollSpy, 100);
+        };
+        
+        // Also update active state on click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('nav-link')) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
