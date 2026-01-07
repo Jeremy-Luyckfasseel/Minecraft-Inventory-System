@@ -1,80 +1,78 @@
 # 🎮 Minecraft Inventory System API
 
-Een professionele RESTful API voor het beheren van een Minecraft-achtig inventory systeem, gebouwd met Node.js, Express en SQLite.
-
-> **Audit Score: 10/10** ✅ MINECRAFT ACCURATE
+A professional RESTful API for managing a Minecraft-style inventory system, built with Node.js, Express, and SQLite.
 
 ---
 
-## 📋 Inhoudsopgave
+## 📋 Table of Contents
 
-- [Installatie](#-installatie)
-- [Project Starten](#-project-starten)
-- [Projectstructuur](#-projectstructuur)
+- [Installation](#-installation)
+- [Starting the Project](#-starting-the-project)
+- [Project Structure](#-project-structure)
 - [API Endpoints](#-api-endpoints)
-- [Architectuur](#-architectuur)
-- [Belangrijke Features](#-belangrijke-features)
-- [Bronvermeldingen](#-bronvermeldingen)
+- [Architecture](#-architecture)
+- [Key Features](#-key-features)
+- [Sources](#-sources)
 
 ---
 
-## 🚀 Installatie
+## 🚀 Installation
 
-### Vereisten
+### Requirements
 
-- **Node.js** versie 24.11.0
-- **npm** (wordt meegeleverd met Node.js)
+- **Node.js** version 24.11.0
+- **npm** (comes with Node.js)
 
-### Stappen
+### Steps
 
-1. **Clone de repository**
+1. **Clone the repository**
 
    ```bash
    git clone https://github.com/Jeremy-Luyckfasseel/Minecraft-Inventory-System.git
    cd Minecraft-Inventory-System
    ```
 
-2. **Installeer dependencies**
+2. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-3. **Initialiseer de database**
+3. **Initialize the database**
 
    ```bash
    npm run setup
    ```
 
-   Dit doet automatisch:
+   This automatically:
 
-   - Maakt alle tabellen aan (players, item_catalog, inventory)
-   - Downloadt 1300+ Minecraft items van PrismarineJS
-   - Voegt 3 voorbeeldspelers toe (Steve, Alex, Herobrine)
-   - Voegt voorbeeld inventory items met enchantments toe
+   - Creates all tables (players, item_catalog, inventory)
+   - Downloads 1300+ Minecraft items from PrismarineJS
+   - Adds 3 example players (Steve, Alex, Herobrine)
+   - Adds example inventory items with enchantments
 
 ---
 
-## ▶️ Project Starten
+## ▶️ Starting the Project
 
 ```bash
 npm start
 ```
 
-De server draait op: **http://localhost:3000**
+The server runs on: **http://localhost:3000**
 
-### Beschikbare Pagina's
+### Available Pages
 
-| URL                                 | Beschrijving                  |
+| URL                                 | Description                   |
 | ----------------------------------- | ----------------------------- |
-| `http://localhost:3000/`            | Interactieve API documentatie |
+| `http://localhost:3000/`            | Interactive API documentation |
 | `http://localhost:3000/health`      | Health check endpoint         |
 | `http://localhost:3000/api/items`   | Inventory items               |
-| `http://localhost:3000/api/players` | Spelers beheren               |
+| `http://localhost:3000/api/players` | Manage players                |
 
 ---
 
-## 📁 Projectstructuur
+## 📁 Project Structure
 
 ```
 Minecraft-Inventory-System/
@@ -85,11 +83,11 @@ Minecraft-Inventory-System/
 ├── package.json
 │
 ├── config/
-│   ├── database.js        # Database connectie
-│   └── endpoints.json     # API documentatie data
+│   ├── database.js        # Database connection
+│   └── endpoints.json     # API documentation data
 │
 ├── controllers/
-│   ├── itemController.js  # Item & Inventory logica
+│   ├── itemController.js  # Item & Inventory logic
 │   └── playerController.js
 │
 ├── routes/
@@ -97,46 +95,46 @@ Minecraft-Inventory-System/
 │   └── playerRoutes.js    # /api/players routes
 │
 └── public/
-    └── index.html         # API documentatie UI
+    └── index.html         # API documentation UI
 ```
 
 ---
 
 ## 📚 API Endpoints
 
-### Catalog (Item Definities)
+### Catalog (Item Definitions)
 
-| Methode | Endpoint                   | Beschrijving                           |
-| ------- | -------------------------- | -------------------------------------- |
-| GET     | `/api/items/catalog`       | Alle items in catalog                  |
-| GET     | `/api/items/catalog/:slug` | Specifiek item (bijv. `diamond_sword`) |
+| Method | Endpoint                   | Description                           |
+| ------ | -------------------------- | ------------------------------------- |
+| GET    | `/api/items/catalog`       | All items in catalog                  |
+| GET    | `/api/items/catalog/:slug` | Specific item (e.g., `diamond_sword`) |
 
-### Inventory (Speler Items)
+### Inventory (Player Items)
 
-| Methode | Endpoint                 | Beschrijving                       |
-| ------- | ------------------------ | ---------------------------------- |
-| GET     | `/api/items`             | Alle inventory items               |
-| GET     | `/api/items/:id`         | Specifiek inventory item           |
-| POST    | `/api/items`             | Item toevoegen (met auto-stacking) |
-| PUT     | `/api/items/:id`         | Item bijwerken                     |
-| PUT     | `/api/items/:id/use`     | Item gebruiken (durability damage) |
-| POST    | `/api/items/:id/enchant` | Enchantment toevoegen              |
-| DELETE  | `/api/items/:id`         | Item verwijderen                   |
+| Method | Endpoint                 | Description                   |
+| ------ | ------------------------ | ----------------------------- |
+| GET    | `/api/items`             | All inventory items           |
+| GET    | `/api/items/:id`         | Specific inventory item       |
+| POST   | `/api/items`             | Add item (with auto-stacking) |
+| PUT    | `/api/items/:id`         | Update item                   |
+| PUT    | `/api/items/:id/use`     | Use item (durability damage)  |
+| POST   | `/api/items/:id/enchant` | Add enchantment               |
+| DELETE | `/api/items/:id`         | Remove item                   |
 
 ### Players
 
-| Methode | Endpoint           | Beschrijving       |
-| ------- | ------------------ | ------------------ |
-| GET     | `/api/players`     | Alle spelers       |
-| GET     | `/api/players/:id` | Specifieke speler  |
-| POST    | `/api/players`     | Nieuwe speler      |
-| PUT     | `/api/players/:id` | Speler bijwerken   |
-| DELETE  | `/api/players/:id` | Speler verwijderen |
+| Method | Endpoint           | Description     |
+| ------ | ------------------ | --------------- |
+| GET    | `/api/players`     | All players     |
+| GET    | `/api/players/:id` | Specific player |
+| POST   | `/api/players`     | New player      |
+| PUT    | `/api/players/:id` | Update player   |
+| DELETE | `/api/players/:id` | Delete player   |
 
-### Voorbeeld Request
+### Example Request
 
 ```bash
-# Item toevoegen aan inventory
+# Add item to inventory
 curl -X POST http://localhost:3000/api/items \
   -H "Content-Type: application/json" \
   -d '{"catalog_item": "diamond_sword", "player_id": 1}'
@@ -144,9 +142,9 @@ curl -X POST http://localhost:3000/api/items \
 
 ---
 
-## 🏗️ Architectuur
+## 🏗️ Architecture
 
-Dit project gebruikt het **Catalog Pattern**:
+This project uses the **Catalog Pattern**:
 
 ```
 ┌─────────────────────┐         ┌─────────────────────┐
@@ -163,42 +161,42 @@ Dit project gebruikt het **Catalog Pattern**:
                                    Player Instances
 ```
 
-**Voordelen:**
+**Benefits:**
 
-- Geen duplicatie van item eigenschappen
-- Durability waarden komen altijd uit de catalog via SQL JOIN
-- Makkelijk uitbreidbaar met nieuwe items
+- No duplication of item properties
+- Durability values always come from the catalog via SQL JOIN
+- Easy to extend with new items
 
 ---
 
-## ⭐ Belangrijke Features
+## ⭐ Key Features
 
 ### 1. Minecraft-Accurate Durability
 
-Alle durability waarden zijn exact zoals in Minecraft:
+All durability values are exactly like in Minecraft:
 
 - **Diamond Sword**: 1561
-- **Diamond Chestplate**: 528 (niet 1561!)
+- **Diamond Chestplate**: 528 (not 1561!)
 - **Netherite Helmet**: 407
 
-### 2. Unbreaking Enchantment Logica
+### 2. Unbreaking Enchantment Logic
 
 ```
-Kans om damage te negeren = Level / (Level + 1)
+Chance to negate damage = Level / (Level + 1)
 
-Unbreaking I:   50% kans (1/2)
-Unbreaking II:  66.7% kans (2/3)
-Unbreaking III: 75% kans (3/4)
+Unbreaking I:   50% chance (1/2)
+Unbreaking II:  66.7% chance (2/3)
+Unbreaking III: 75% chance (3/4)
 ```
 
-### 3. Automatische Item Breaking
+### 3. Automatic Item Breaking
 
-Als `current_durability` ≤ 0, wordt het item **permanent verwijderd** uit de database (net als in Minecraft).
+When `current_durability` ≤ 0, the item is **permanently deleted** from the database (just like in Minecraft).
 
-### 4. Intelligente Stacking
+### 4. Intelligent Stacking
 
-- Items met `stack_limit > 1` worden automatisch gestackt
-- Stack overflow preventie (max 64 of 16 voor bepaalde items)
+- Items with `stack_limit > 1` are automatically stacked
+- Stack overflow prevention (max 64 or 16 for certain items)
 
 ### 5. Potion Metadata
 
@@ -215,20 +213,20 @@ Als `current_durability` ≤ 0, wordt het item **permanent verwijderd** uit de d
 
 ### 6. Security Features
 
-- SQL Injection preventie via whitelist voor sort fields
-- Input validatie (amount moet ≥ 1 zijn)
+- SQL Injection prevention via whitelist for sort fields
+- Input validation (amount must be ≥ 1)
 - Parameterized queries
 
 ---
 
-## 📖 Bronvermeldingen
+## 📖 Sources
 
 ### Data Sources
 
-- **PrismarineJS/minecraft-data** - Officiële Minecraft 1.21 item data  
+- **PrismarineJS/minecraft-data** - Official Minecraft 1.21 item data  
   https://github.com/PrismarineJS/minecraft-data
 
-- **Minecraft Wiki** - Durability waarden verificatie  
+- **Minecraft Wiki** - Durability values verification  
   https://minecraft.wiki/w/Durability
 
 ### Frameworks & Libraries
@@ -244,22 +242,22 @@ Als `current_durability` ≤ 0, wordt het item **permanent verwijderd** uit de d
 
 ### Minecraft Game Mechanics
 
-- Unbreaking enchantment formule: `Level / (Level + 1)`
+- Unbreaking enchantment formula: `Level / (Level + 1)`
 - Armor durability per piece (Helmet ≠ Chestplate ≠ Leggings ≠ Boots)
 - Tool durability per material (Wood < Stone < Iron < Diamond < Netherite)
 
 ---
 
-## 📝 Licentie
+## 📝 License
 
 ISC License
 
 ---
 
-## 👤 Auteur
+## 👤 Author
 
-Gemaakt als schoolproject voor Backend Development.
+Created as a school project for Backend Web.
 
 ---
 
-> 💡 **Tip:** Bezoek `http://localhost:3000/` voor interactieve API documentatie met voorbeelden!
+> 💡 **Tip:** Visit `http://localhost:3000/` for interactive API documentation with examples!
